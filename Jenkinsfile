@@ -27,9 +27,9 @@ pipeline {
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
-                    bat """
-                    echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
-                    """
+                    bat '''
+                        echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
+                    '''
                 }
             }
         }
@@ -42,11 +42,10 @@ pipeline {
 
         stage('Deploy Container') {
             steps {
-                bat """
-                docker stop %CONTAINER_NAME% || exit 0
-                docker rm %CONTAINER_NAME% || exit 0
-                docker run -d -p 9090:80 --name %CONTAINER_NAME% %IMAGE_NAME%
-                """
+                bat '''
+                    docker rm -f %CONTAINER_NAME% || exit 0
+                    docker run -d -p 9090:80 --name %CONTAINER_NAME% %IMAGE_NAME%
+                '''
             }
         }
     }
