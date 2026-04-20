@@ -22,8 +22,14 @@ pipeline {
 
         stage('Docker Login') {
             steps {
-                withCredentials([string(credentialsId: 'docker-pass', variable: 'PASS')]) {
-                    bat "echo %PASS% | docker login -u nandhini0916 --password-stdin"
+                withCredentials([usernamePassword(
+                    credentialsId: 'docker-pass',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    bat """
+                    echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
+                    """
                 }
             }
         }
@@ -47,10 +53,10 @@ pipeline {
 
     post {
         success {
-            echo "🚀 Auto Deploy Successful!"
+            echo "🚀 Auto Deploy Successful! App running at http://localhost:9090"
         }
         failure {
-            echo "❌ Deployment Failed"
+            echo "❌ Deployment Failed - check logs"
         }
     }
 }
