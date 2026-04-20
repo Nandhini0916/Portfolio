@@ -2,61 +2,55 @@ pipeline {
     agent any
 
     environment {
-        IMAGE = "nandhini0916/portfolio"
-        TAG = "v1"
+        IMAGE_NAME = "nandhini0916/portfolio:v1"
+        CONTAINER_NAME = "portfolio-container"
     }
 
     stages {
 
-        stage('Clone Code') {
+        stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/Nandhini0916/Portfolio.git'
+                git 'https://github.com/Nandhini0916/Portfolio.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                bat 'docker build -t %IMAGE%:%TAG% .'
+                bat "docker build -t %IMAGE_NAME% ."
             }
         }
 
-        stage('Login to Docker Hub') {
+        stage('Docker Login') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'docker-pass', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                    bat 'docker login -u %USER% -p %PASS%'
-                    bat 'docker push %IMAGE%:%TAG%'
+                withCredentials([string(credentialsId: 'docker-pass', variable: 'PASS')]) {
+                    bat "echo %PASS% | docker login -u nandhini0916 --password-stdin"
                 }
             }
         }
 
-        stage('Push Docker Image') {
+        stage('Push Image') {
             steps {
-                bat 'docker push %IMAGE%:%TAG%'
+                bat "docker push %IMAGE_NAME%"
             }
         }
 
-        stage('Stop Old Container (if running)') {
+        stage('Deploy Container') {
             steps {
-                bat '''
-                docker stop portfolio-container || exit 0
-                docker rm portfolio-container || exit 0
-                '''
-            }
-        }
-
-        stage('Run New Container') {
-            steps {
-                bat 'docker run -d -p 9090:80 --name portfolio-container %IMAGE%:%TAG%'
+                bat """
+                docker stop %CONTAINER_NAME% || exit 0
+                docker rm %CONTAINER_NAME% || exit 0
+                docker run -d -p 9090:80 --name %CONTAINER_NAME% %IMAGE_NAME%
+                """
             }
         }
     }
 
     post {
         success {
-            echo '✅ Deployment Successful! Access your app at http://localhost:9090'
+            echo "🚀 Auto Deploy Successful!"
         }
         failure {
-            echo '❌ Pipeline Failed. Check logs.'
+            echo "❌ Deployment Failed"
         }
     }
 }
