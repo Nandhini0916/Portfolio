@@ -23,7 +23,7 @@ pipeline {
         stage('Docker Login') {
             steps {
                 withCredentials([usernamePassword(
-                    credentialsId: 'docker-pass',
+                    credentialsId: 'docker-hub-creds',
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
@@ -53,7 +53,7 @@ pipeline {
 
     post {
         success {
-            echo "🚀 Auto Deploy Successful! App running at http://localhost:9090"
+            echo "🚀 Deployment Successful!"
         }
         failure {
             echo "❌ Deployment Failed - check logs"
