@@ -27,8 +27,14 @@ pipeline {
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
+
+                    // Write token to file (prevents Windows echo issues)
+                    writeFile file: 'token.txt', text: DOCKER_PASS
+
                     bat '''
-                        echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
+                        docker logout
+                        docker login -u %DOCKER_USER% --password-stdin < token.txt
+                        del token.txt
                     '''
                 }
             }
