@@ -5,13 +5,6 @@ pipeline {
         IMAGE_NAME = "nandhini0916/portfolio:v1"
         CONTAINER_NAME = "portfolio-container"
     }
-    
-    options {
-        docker {
-            // This ensures Docker commands work
-            requiredDockerRegistry ''
-        }
-    }
 
     stages {
         stage('Checkout') {
