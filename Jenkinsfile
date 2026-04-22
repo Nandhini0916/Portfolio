@@ -1,13 +1,19 @@
 pipeline {
     agent any
-
+    
     environment {
         IMAGE_NAME = "nandhini0916/portfolio:v1"
         CONTAINER_NAME = "portfolio-container"
     }
+    
+    options {
+        docker {
+            // This ensures Docker commands work
+            requiredDockerRegistry ''
+        }
+    }
 
     stages {
-
         stage('Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/Nandhini0916/Portfolio.git'
@@ -27,15 +33,7 @@ pipeline {
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
-
-                    // Write token to file (prevents Windows echo issues)
-                    writeFile file: 'token.txt', text: DOCKER_PASS
-
-                    bat '''
-                        docker logout
-                        docker login -u %DOCKER_USER% --password-stdin < token.txt
-                        del token.txt
-                    '''
+                    bat "docker login -u %DOCKER_USER% -p %DOCKER_PASS%"
                 }
             }
         }
